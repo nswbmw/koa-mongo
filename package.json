@@ -1,0 +1,25 @@
+{
+  "name": "koa-mongo",
+  "version": "0.1.0",
+  "description": "MongoDB middleware for koa, support connection pool.",
+  "main": "index.js",
+  "keywords": [
+    "koa",
+    "mongo",
+    "mongodb"
+  ],
+  "scripts": {
+    "test": "node --harmony test"
+  },
+  "dependencies": {
+    "debug": "^1.0.4",
+    "generic-pool": "^2.1.1",
+    "mongodb": "^1.4.8"
+  },
+  "devDependencies": {
+    "koa": "^0.8.2"
+  },
+  "author": "nswbmw",
+  "license": "MIT",
+  "repository": "https://github.com/MangroveTech/koa-mongo.git"
+}
