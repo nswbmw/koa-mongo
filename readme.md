@@ -21,6 +21,18 @@ app.use(mongo({
 }));
 ```
 
+or
+
+```
+app.use(mongo({
+  uri: 'mongodb://admin:123456@localhost:27017'
+  max: 100,
+  min: 1,
+  timeout: 30000,
+  log: false
+}));
+```
+
 ### Example
 
 ```
