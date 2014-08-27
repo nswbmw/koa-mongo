@@ -14,10 +14,14 @@ function mongo(options) {
   var timeout = options.timeout || 30000;
   var log = options.log || false;
   var mongoUrl = '';
-  if (options.user && options.pass) {
-    mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port;
+  if(options.uri) {
+    mongoUrl = options.uri;
   } else {
-    mongoUrl = 'mongodb://' + host + ':' + port;
+    if (options.user && options.pass) {
+      mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port;
+    } else {
+      mongoUrl = 'mongodb://' + host + ':' + port;
+    }
   }
   return function* (next) {
     if (!this.app._mongoPool) {
