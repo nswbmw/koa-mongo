@@ -45,9 +45,13 @@ function mongo(options) {
     if (!this.mongo) this.throw('Fail to acquire one mongo connection')
     debug('Acquire one connection');
 
-    yield next;
-
-    this.app._mongoPool.release(this.mongo);
-    debug('Release one connection');
+    try {
+      yield* next;
+    } catch (e) {
+      throw e;
+    } finally {
+      this.app._mongoPool.release(this.mongo);
+      debug('Release one connection');
+    }
   }
 } 
