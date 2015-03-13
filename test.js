@@ -5,7 +5,7 @@ var app = koa();
 
 app.use(mongo());
 app.use(function* (next) {
-  this.mongo.db('test').collection('data').findOne({}, function (err, doc) {
+  this.mongo.db('test').collection('users').findOne({}, function (err, doc) {
     console.log(doc);
   });
 });

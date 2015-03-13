@@ -25,7 +25,7 @@ or
 
 ```
 app.use(mongo({
-  uri: 'mongodb://admin:123456@localhost:27017'
+  uri: 'mongodb://admin:123456@localhost:27017' //or url
   max: 100,
   min: 1,
   timeout: 30000,
@@ -43,7 +43,7 @@ var app = koa();
 
 app.use(mongo());
 app.use(function* (next) {
-  this.mongo.db('test').collection('data').findOne({}, function (err, doc) {
+  this.mongo.db('test').collection('users').findOne({}, function (err, doc) {
     console.log(doc);
   });
 });
