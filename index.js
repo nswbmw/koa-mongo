@@ -12,12 +12,16 @@ function mongo(options) {
   var min = options.min || 1;
   var timeout = options.timeout || 30000;
   var log = options.log || false;
+  var db = options.db;
   var mongoUrl = options.uri || options.url;
   if(!mongoUrl) {
     if (options.user && options.pass) {
       mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port;
     } else {
       mongoUrl = 'mongodb://' + host + ':' + port;
+    }
+    if (db) {
+      mongoUrl = mongoUrl + '/' + db;
     }
   }
 
