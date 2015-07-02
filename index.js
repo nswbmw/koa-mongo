@@ -30,7 +30,8 @@ function mongo(options) {
     create   : function(callback) {
       MongoClient.connect(mongoUrl, {
         server: {poolSize: 1},
-        native_parser: true
+        native_parser: true,
+        uri_decode_auth: true
       }, function (err, client) {
         if (err) throw err;
         callback(err, client);
