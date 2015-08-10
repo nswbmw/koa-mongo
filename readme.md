@@ -26,7 +26,7 @@ or
 
 ```
 app.use(mongo({
-  uri: 'mongodb://admin:123456@localhost:27017/test' //or url
+  uri: 'mongodb://admin:123456@localhost:27017/test', //or url
   max: 100,
   min: 1,
   timeout: 30000,
