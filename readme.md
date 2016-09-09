@@ -37,6 +37,8 @@ app.use(mongo({
 ### Example
 
 ```
+'use strict';
+
 var koa = require('koa');
 var mongo = require('koa-mongo');
 
@@ -44,11 +46,11 @@ var app = koa();
 
 app.use(mongo());
 app.use(function* (next) {
-  this.mongo.db('test').collection('users').findOne({}, function (err, doc) {
-    console.log(doc);
-  });
-
+  yield this.mongo.db('test').collection('users').insert({ name: 'haha' });
   this.body = yield this.mongo.db('test').collection('users').findOne();
+  this.mongo.db('test').collection('users').remove().then(function (res) {
+    console.log(res.result);
+  });
 });
 app.listen(3000);
 ```

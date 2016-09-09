@@ -14,16 +14,13 @@ function mongo(options) {
   var min = options.min || 1;
   var timeout = options.timeout || 30000;
   var log = options.log || false;
-  var db = options.db;
+  var db = options.db || 'test';
   var mongoUrl = options.uri || options.url;
   if(!mongoUrl) {
     if (options.user && options.pass) {
-      mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port;
+      mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port + '/' + db;
     } else {
-      mongoUrl = 'mongodb://' + host + ':' + port;
-    }
-    if (db) {
-      mongoUrl = mongoUrl + '/' + db;
+      mongoUrl = 'mongodb://' + host + ':' + port + '/' + db;
     }
   }
 
@@ -34,10 +31,7 @@ function mongo(options) {
         server: {poolSize: 1},
         native_parser: true,
         uri_decode_auth: true
-      }, function (err, client) {
-        if (err) throw err;
-        callback(err, client);
-      });
+      }, callback);
     },
     destroy  : function(client) {client.close();},
     max      : max,
@@ -46,9 +40,9 @@ function mongo(options) {
     log : log 
   });
 
-  return function* mongo(next) {
+  return function* koaMongo(next) {
     this.mongo = yield mongoPool.acquire.bind(mongoPool);
-    if (!this.mongo) this.throw('Fail to acquire one mongo connection')
+    if (!this.mongo) this.throw('Fail to acquire one mongo connection');
     debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());
 
     try {
