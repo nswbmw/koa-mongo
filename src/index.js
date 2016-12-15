@@ -1,5 +1,3 @@
-'use strict';
-
 var MongoClient = require('mongodb').MongoClient;
 var debug = require('debug')('koa-mongo');
 var poolModule = require('generic-pool');
@@ -24,34 +22,43 @@ function mongo(options) {
     }
   }
 
-  var mongoPool = poolModule.Pool({
-    name     : 'koa-mongo',
-    create   : function(callback) {
+  const factory = {
+    create: () => new Promise((res, rej) => {
       MongoClient.connect(mongoUrl, {
         server: {poolSize: 1},
         native_parser: true,
         uri_decode_auth: true
-      }, callback);
-    },
-    destroy  : function(client) {client.close();},
-    max      : max,
-    min      : min, 
-    idleTimeoutMillis : timeout,
-    log : log 
-  });
+      }, (err, db) => {
+        if(err) return rej(err);
+        return res(db);
+      });
+    }),
+    destroy: client => client.close(),
+  };
 
-  return function* koaMongo(next) {
-    this.mongo = yield mongoPool.acquire.bind(mongoPool);
-    if (!this.mongo) this.throw('Fail to acquire one mongo connection');
-    debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());
+  const opts = {
+    name: 'koa-mongo',
+    max,
+    min,
+    idleTimeoutMillis : timeout,
+    log
+  };
+
+  var mongoPool = poolModule.createPool(factory, opts);
+
+  return async (ctx, next) => {
+    ctx.mongo = await mongoPool.acquire();
+
+    if (!ctx.mongo) throw new Error('Fail to acquire one mongo connection');
+    debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.size);
 
     try {
-      yield* next;
+      await next();
     } catch (e) {
       throw e;
     } finally {
-      mongoPool.release(this.mongo);
-      debug('Release one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());
+      mongoPool.release(ctx.mongo);
+      debug('Release one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.size);
     }
   };
-} 
+}

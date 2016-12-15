@@ -2,22 +2,30 @@
   "name": "koa-mongo",
   "version": "0.6.0",
   "description": "MongoDB middleware for koa, support connection pool.",
-  "main": "index.js",
+  "main": "dist/index.js",
   "keywords": [
     "koa",
     "mongo",
     "mongodb"
   ],
   "scripts": {
-    "example": "DEBUG=* node --harmony example"
+    "example": "DEBUG=* node --harmony example",
+    "build": "./node_modules/.bin/babel -d dist/ src/",
+    "build:watch": "./node_modules/.bin/babel -wd dist/ src/"
   },
   "dependencies": {
     "debug": "2.2.0",
-    "generic-pool": "2.4.2",
+    "generic-pool": "^3.1.4",
     "mongodb": "2.2.9"
   },
   "devDependencies": {
-    "koa": "1.2.4"
+    "babel-cli": "^6.18.0",
+    "babel-core": "^6.20.0",
+    "babel-polyfill": "^6.20.0",
+    "babel-preset-latest": "^6.16.0",
+    "babel-preset-stage-0": "^6.16.0",
+    "babel-watch": "^2.0.4",
+    "koa": "2"
   },
   "author": "nswbmw",
   "license": "MIT",
