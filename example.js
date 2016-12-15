@@ -1,16 +1,16 @@
 'use strict';
 
-var koa = require('koa');
-var mongo = require('./');
+const koa = require('koa');
+const mongo = require('./');
 
-var app = koa();
+const app = new koa();
 
 app.use(mongo());
-app.use(function* (next) {
-  yield this.mongo.db('test').collection('users').insert({ name: 'haha' });
-  this.body = yield this.mongo.db('test').collection('users').findOne();
-  this.mongo.db('test').collection('users').remove().then(function (res) {
-    console.log(res.result);
-  });
+app.use(async (ctx, next) => {
+  await ctx.mongo.db('test').collection('users').insert({ name: 'haha' });
+  ctx.body = await ctx.mongo.db('test').collection('users').find().toArray();
+  ctx.mongo.db('test').collection('users').remove();
 });
-app.listen(3000);
+app.listen(3000, () => {
+  console.log('listening on port 3000');
+});
