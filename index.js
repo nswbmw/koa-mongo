@@ -36,14 +36,20 @@ function mongo(options) {
   return function koaMongo(ctx, next) {
     return mongoPool.acquire()
       .then(mongo => {
-        if (!mongo) throw new Error('Fail to acquire one mongo connection');
-        debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
         ctx.mongo = mongo;
+        debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
         return next();
       })
       .then(() => {
         mongoPool.release(ctx.mongo);
         debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
+      })
+      .catch(e => {
+        if (ctx.mongo) {
+          mongoPool.release(ctx.mongo);
+          debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);   
+        }
+        throw e;
       });
   };
 }
