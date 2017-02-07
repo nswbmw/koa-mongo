@@ -2,7 +2,7 @@
 
 koa-mongo is a mongodb middleware for koa@2, support connection pool.
 
-**NB**: If you use koa@1, use koa-mongo@0.6.0.
+**NB**: If you use koa@1, use koa-mongo@0.
 
 ### Install
 
