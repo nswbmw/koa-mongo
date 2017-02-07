@@ -1,10 +1,14 @@
 'use strict';
 
-var MongoClient = require('mongodb').MongoClient;
+var MongoDB = require('mongodb');
+var MongoClient = MongoDB.MongoClient;
 var debug = require('debug')('koa-mongo');
 var poolModule = require('generic-pool');
 
 module.exports = mongo;
+for (var key in MongoDB) {
+  mongo[key] = MongoDB[key];
+}
 
 function mongo(options) {
   options = options || {};

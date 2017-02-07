@@ -1,6 +1,6 @@
 {
   "name": "koa-mongo",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "MongoDB middleware for koa, support connection pool.",
   "main": "index.js",
   "keywords": [
@@ -12,9 +12,9 @@
     "example": "DEBUG=* node --harmony example"
   },
   "dependencies": {
-    "debug": "2.2.0",
-    "generic-pool": "2.4.2",
-    "mongodb": "2.2.9"
+    "debug": "2.6.0",
+    "generic-pool": "2.5.4",
+    "mongodb": "2.2.22"
   },
   "devDependencies": {
     "koa": "1.2.4"

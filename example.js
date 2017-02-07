@@ -7,10 +7,13 @@ var app = koa();
 
 app.use(mongo());
 app.use(function* (next) {
-  yield this.mongo.db('test').collection('users').insert({ name: 'haha' });
-  this.body = yield this.mongo.db('test').collection('users').findOne();
-  this.mongo.db('test').collection('users').remove().then(function (res) {
-    console.log(res.result);
+  var result = yield this.mongo.db('test').collection('users').insert({ name: Date.now() });
+  var userId = result.ops[0]._id.toString();
+  this.body = yield this.mongo.db('test').collection('users').find().toArray();
+  this.mongo.db('test').collection('users').remove({
+    _id: mongo.ObjectId(userId)
   });
 });
-app.listen(3000);
+app.listen(3000, function() {
+  console.log('listening on 3000.');
+});
