@@ -1,6 +1,6 @@
 {
   "name": "koa-mongo",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "MongoDB middleware for koa, support connection pool.",
   "main": "index.js",
   "keywords": [
@@ -12,10 +12,10 @@
     "example": "DEBUG=* node example"
   },
   "dependencies": {
-    "debug": "2.4.4",
-    "generic-pool": "3.1.4",
-    "lodash": "4.17.2",
-    "mongodb": "2.2.16"
+    "debug": "2.6.0",
+    "generic-pool": "3.1.6",
+    "lodash": "4.17.4",
+    "mongodb": "2.2.22"
   },
   "devDependencies": {
     "koa": "2"

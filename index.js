@@ -1,7 +1,8 @@
 'use strict';
 
 const _ = require('lodash');
-const MongoClient = require('mongodb').MongoClient;
+const MongoDB = require('mongodb');
+const MongoClient = MongoDB.MongoClient;
 const debug = require('debug')('koa-mongo');
 const genericPool = require('generic-pool');
 
@@ -55,3 +56,4 @@ function mongo(options) {
 }
 
 module.exports = mongo;
+_.assign(module.exports, MongoDB);
