@@ -6,7 +6,7 @@ const MongoClient = MongoDB.MongoClient;
 const debug = require('debug')('koa-mongo');
 const genericPool = require('generic-pool');
 
-const defaulfOptions = {
+const defaultOptions = {
   host: 'localhost',
   port: 27017,
   db: 'test',
@@ -15,7 +15,7 @@ const defaulfOptions = {
 };
 
 function mongo(options) {
-  options = _.assign({}, defaulfOptions, options);
+  options = _.assign({}, defaultOptions, options);
   let mongoUrl = options.uri || options.url;
   if (!mongoUrl) {
     if (options.user && options.pass) {
