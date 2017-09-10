@@ -1,6 +1,6 @@
 {
   "name": "koa-mongo",
-  "version": "0.7.1",
+  "version": "0.8.0",
   "description": "MongoDB middleware for koa, support connection pool.",
   "main": "index.js",
   "keywords": [

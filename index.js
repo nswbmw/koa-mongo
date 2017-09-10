@@ -20,6 +20,8 @@ function mongo(options) {
   var log = options.log || false;
   var db = options.db || 'test';
   var mongoUrl = options.uri || options.url;
+  var reconnectTries = options.reconnectTries || 30;
+  var reconnectInterval = options.reconnectInterval || 1000;
   if(!mongoUrl) {
     if (options.user && options.pass) {
       mongoUrl = 'mongodb://' + options.user + ':' + options.pass + '@' + host + ':' + port + '/' + db;
@@ -27,11 +29,20 @@ function mongo(options) {
       mongoUrl = 'mongodb://' + host + ':' + port + '/' + db;
     }
   }
+  const wait = (ms) => {
+      let start = Date.now(),
+          now = start;
+      while (now - start < ms) {
+          now = Date.now();
+      }
+  };
 
-  var mongoPool = poolModule.Pool({
+  var createMongoPool = () => poolModule.Pool({
     name     : 'koa-mongo',
     create   : function(callback) {
       MongoClient.connect(mongoUrl, {
+        reconnectTries: reconnectTries,
+          reconnectInterval: reconnectInterval,
         server: {poolSize: 1},
         native_parser: true,
         uri_decode_auth: true
@@ -44,9 +55,23 @@ function mongo(options) {
     log : log 
   });
 
+  let mongoPool = createMongoPool();
+
   return function* koaMongo(next) {
+
     this.mongo = yield mongoPool.acquire.bind(mongoPool);
+
     if (!this.mongo) this.throw('Fail to acquire one mongo connection');
+
+    if (!(this.mongo).serverConfig.isConnected()) {
+        wait(reconnectTries*reconnectInterval);
+
+        if (!(this.mongo).serverConfig.isConnected()) {
+            mongoPool = createMongoPool();
+            this.mongo = yield mongoPool.acquire.bind(mongoPool);
+        }
+    }
+
     debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());
 
     try {
