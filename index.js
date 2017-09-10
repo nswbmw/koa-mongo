@@ -4,6 +4,7 @@ var MongoDB = require('mongodb');
 var MongoClient = MongoDB.MongoClient;
 var debug = require('debug')('koa-mongo');
 var poolModule = require('generic-pool');
+var promiseRetry = require('promise-retry');
 
 module.exports = mongo;
 for (var key in MongoDB) {
@@ -29,12 +30,20 @@ function mongo(options) {
       mongoUrl = 'mongodb://' + host + ':' + port + '/' + db;
     }
   }
-  const wait = (ms) => {
-      let start = Date.now(),
-          now = start;
-      while (now - start < ms) {
-          now = Date.now();
-      }
+
+  const wait = function* (retries, retryInterval) {
+    const retryOptions = {
+      retries: retries,
+      minTimeout: retryInterval,
+      maxTimeout: retryInterval
+    };
+
+    const retryOperation = (retry, number) => {
+      if (number < retries)
+        retry();
+    };
+
+    yield promiseRetry(retryOperation, retryOptions);
   };
 
   var createMongoPool = () => poolModule.Pool({
@@ -42,7 +51,7 @@ function mongo(options) {
     create   : function(callback) {
       MongoClient.connect(mongoUrl, {
         reconnectTries: reconnectTries,
-          reconnectInterval: reconnectInterval,
+        reconnectInterval: reconnectInterval,
         server: {poolSize: 1},
         native_parser: true,
         uri_decode_auth: true
@@ -64,12 +73,15 @@ function mongo(options) {
     if (!this.mongo) this.throw('Fail to acquire one mongo connection');
 
     if (!(this.mongo).serverConfig.isConnected()) {
-        wait(reconnectTries*reconnectInterval);
 
-        if (!(this.mongo).serverConfig.isConnected()) {
-            mongoPool = createMongoPool();
-            this.mongo = yield mongoPool.acquire.bind(mongoPool);
-        }
+      yield wait(reconnectTries, reconnectInterval);
+
+      if (!(this.mongo).serverConfig.isConnected()) {
+
+        mongoPool = createMongoPool();
+
+        this.mongo = yield mongoPool.acquire.bind(mongoPool);
+      }
     }
 
     debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());

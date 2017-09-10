@@ -14,7 +14,8 @@
   "dependencies": {
     "debug": "2.6.0",
     "generic-pool": "2.5.4",
-    "mongodb": "~2.1.0"
+    "mongodb": "~2.1.0",
+    "promise-retry": "1.0.0"
   },
   "devDependencies": {
     "koa": "1.2.4"
