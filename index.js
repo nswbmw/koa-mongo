@@ -31,21 +31,6 @@ function mongo(options) {
     }
   }
 
-  const wait = function* (retries, retryInterval) {
-    const retryOptions = {
-      retries: retries,
-      minTimeout: retryInterval,
-      maxTimeout: retryInterval
-    };
-
-    const retryOperation = (retry, number) => {
-      if (number < retries)
-        retry();
-    };
-
-    yield promiseRetry(retryOperation, retryOptions);
-  };
-
   var createMongoPool = () => poolModule.Pool({
     name     : 'koa-mongo',
     create   : function(callback) {
@@ -68,20 +53,19 @@ function mongo(options) {
 
   return function* koaMongo(next) {
 
-    this.mongo = yield mongoPool.acquire.bind(mongoPool);
+    try {
+      this.mongo = yield mongoPool.acquire.bind(mongoPool);
+    } catch(e) {
+      mongoPool = createMongoPool();
+      this.mongo = yield mongoPool.acquire.bind(mongoPool);
+    }
 
     if (!this.mongo) this.throw('Fail to acquire one mongo connection');
 
     if (!(this.mongo).serverConfig.isConnected()) {
 
-      yield wait(reconnectTries, reconnectInterval);
-
-      if (!(this.mongo).serverConfig.isConnected()) {
-
-        mongoPool = createMongoPool();
-
-        this.mongo = yield mongoPool.acquire.bind(mongoPool);
-      }
+      mongoPool.drain();
+      this.throw('Cannot connect to MongoDB')
     }
 
     debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', min, max, mongoPool.getPoolSize());
