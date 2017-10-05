@@ -18,7 +18,9 @@ app.use(mongo({
   max: 100,
   min: 1,
   timeout: 30000,
-  log: false
+  log: false,
+  reconnectTries: 30,
+  reconnectInterval: 1000
 }));
 ```
 
