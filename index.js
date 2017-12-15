@@ -25,29 +25,29 @@ function mongo(options) {
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl, {
-      poolSize: 1
-    }),
+    create: () => MongoClient.connect(mongoUrl),
     destroy: client => client.close()
   }, options);
 
-  return function koaMongo(ctx, next) {
+  async function release(resource) {
+    await mongoPool.release(resource);
+    debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
+  }
+
+  return async function koaMongo(ctx, next) {
     return mongoPool.acquire()
-      .then(mongo => {
+      .then(async mongo => {
         ctx.mongo = mongo;
         debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
         return next();
       })
-      .then(() => {
-        mongoPool.release(ctx.mongo);
-        debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
+      .then(async () => {
+        await release(ctx.mongo);
       })
-      .catch(e => {
-        if (ctx.mongo) {
-          mongoPool.release(ctx.mongo);
-          debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);   
-        }
-        throw e;
+      .catch(async error => {
+        await release(ctx.mongo);
+
+        throw error;
       });
   };
 }
