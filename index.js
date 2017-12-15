@@ -1,6 +1,5 @@
 'use strict';
 
-const _ = require('lodash');
 const MongoDB = require('mongodb');
 const MongoClient = MongoDB.MongoClient;
 const debug = require('debug')('koa-mongo');
@@ -15,7 +14,7 @@ const defaultOptions = {
 };
 
 function mongo(options) {
-  options = _.assign({}, defaultOptions, options);
+  options = Object.assign({}, defaultOptions, options);
   let mongoUrl = options.uri || options.url;
   if (!mongoUrl) {
     if (options.user && options.pass) {
@@ -27,9 +26,7 @@ function mongo(options) {
 
   const mongoPool = genericPool.createPool({
     create: () => MongoClient.connect(mongoUrl, {
-      server: { poolSize: 1 },
-      native_parser: true,
-      uri_decode_auth: true
+      poolSize: 1
     }),
     destroy: client => client.close()
   }, options);
@@ -56,4 +53,4 @@ function mongo(options) {
 }
 
 module.exports = mongo;
-_.assign(module.exports, MongoDB);
+Object.assign(module.exports, MongoDB);
