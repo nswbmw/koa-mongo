@@ -25,7 +25,7 @@ function mongo(options) {
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl),
+    create: () => MongoClient.connect(mongoUrl, { useNewUrlParser: true }),
     destroy: client => client.close()
   }, options);
 
