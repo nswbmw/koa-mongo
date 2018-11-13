@@ -1,56 +1,63 @@
-'use strict';
+'use strict'
 
-const MongoDB = require('mongodb');
-const MongoClient = MongoDB.MongoClient;
-const debug = require('debug')('koa-mongo');
-const genericPool = require('generic-pool');
+const MongoDB = require('mongodb')
+const MongoClient = MongoDB.MongoClient
+const debug = require('debug')('koa-mongo')
+const genericPool = require('generic-pool')
 
 const defaultOptions = {
   host: 'localhost',
   port: 27017,
   db: 'test',
   max: 100,
-  min: 1
-};
+  min: 1,
+  acquireTimeoutMillis: 100
+}
 
-function mongo(options) {
-  options = Object.assign({}, defaultOptions, options);
-  let mongoUrl = options.uri || options.url;
+function mongo (options) {
+  options = Object.assign({}, defaultOptions, options)
+  let mongoUrl = options.uri || options.url
   if (!mongoUrl) {
     if (options.user && options.pass) {
-      mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}`;
+      mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}`
     } else {
-      mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`;
+      mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`
     }
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl, { useNewUrlParser: true }),
+    create: () => MongoClient.connect(mongoUrl, {
+      useNewUrlParser: true,
+      reconnectTries: 1
+    }),
     destroy: client => client.close()
-  }, options);
+  }, options)
 
-  async function release(resource) {
-    await mongoPool.release(resource);
-    debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
+  async function acquire () {
+    const resource = await mongoPool.acquire()
+    debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size)
+
+    return resource
   }
 
-  return async function koaMongo(ctx, next) {
-    return mongoPool.acquire()
-      .then(async mongo => {
-        ctx.mongo = mongo;
-        debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size);
-        return next();
-      })
-      .then(async () => {
-        await release(ctx.mongo);
-      })
-      .catch(async error => {
-        await release(ctx.mongo);
+  async function release (resource) {
+    if (resource && !resource.isConnected()) {
+      await mongoPool.destroy(resource)
+    } else {
+      await mongoPool.release(resource)
+    }
+    debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size)
+  }
 
-        throw error;
-      });
-  };
+  return async function koaMongo (ctx, next) {
+    ctx.mongo = await acquire()
+    try {
+      await next()
+    } finally {
+      await release(ctx.mongo)
+    }
+  }
 }
 
-module.exports = mongo;
-Object.assign(module.exports, MongoDB);
+module.exports = mongo
+Object.assign(module.exports, MongoDB)
