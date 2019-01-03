@@ -5,10 +5,9 @@ const app = new Koa()
 
 app.use(mongo())
 app.use(async (ctx, next) => {
-  const collection = ctx.mongo.db('test').collection('users')
-  await collection.insertOne({ name: 'example' })
-  ctx.body = await collection.find().toArray()
-  await collection.removeMany({ name: 'example' })
+  await ctx.mongo.db('test').collection('users').insertOne({ name: 'example' })
+  ctx.body = await ctx.db.collection('users').find().toArray()
+  await ctx.db.collection('users').removeMany({ name: 'example' })
 })
 
 app.listen(3000, () => {

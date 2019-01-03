@@ -4,6 +4,7 @@ const MongoDB = require('mongodb')
 const MongoClient = MongoDB.MongoClient
 const debug = require('debug')('koa-mongo')
 const genericPool = require('generic-pool')
+const muri = require('muri')
 
 const defaultOptions = {
   host: 'localhost',
@@ -17,12 +18,16 @@ const defaultOptions = {
 function mongo (options) {
   options = Object.assign({}, defaultOptions, options)
   let mongoUrl = options.uri || options.url
+  let dbName = options.db
   if (!mongoUrl) {
     if (options.user && options.pass) {
       mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}`
     } else {
       mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`
     }
+  } else {
+    const o = muri(mongoUrl)
+    dbName = o.db
   }
 
   const mongoPool = genericPool.createPool({
@@ -51,6 +56,7 @@ function mongo (options) {
 
   return async function koaMongo (ctx, next) {
     ctx.mongo = await acquire()
+    ctx.db = ctx.mongo.db(dbName)
     try {
       await next()
     } finally {

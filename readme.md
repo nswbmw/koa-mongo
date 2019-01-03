@@ -49,6 +49,14 @@ defaultOptions:
 
 More options see [generic-pool](https://github.com/coopernurse/node-pool).
 
+### ctx.mongo & ctx.db
+
+`ctx.mongo` is an instance of MongoClient.
+
+```js
+ctx.db === ctx.mongo.db(dbName)
+```
+
 ### Example
 
 ```js
@@ -59,10 +67,11 @@ const app = new Koa()
 
 app.use(mongo())
 app.use(async (ctx, next) => {
-  const result = await ctx.mongo.db('test').collection('users').insert({ name: 'haha' })
+  // ctx.db === ctx.mongo.db('test')
+  const result = await ctx.db.collection('users').insert({ name: 'haha' })
   const userId = result.ops[0]._id.toString()
-  ctx.body = await ctx.mongo.db('test').collection('users').find().toArray()
-  ctx.mongo.db('test').collection('users').remove({
+  ctx.body = await ctx.db.collection('users').find().toArray()
+  ctx.db.collection('users').remove({
     _id: mongo.ObjectId(userId)
   })
 })
@@ -70,6 +79,10 @@ app.listen(3000, () => {
   console.log('listening on port 3000')
 })
 ```
+
+### [Mongolass](https://github.com/mongolass/mongolass)
+
+Mongolass is a elegant MongoDB driver for Node.js.
 
 ### License
 
