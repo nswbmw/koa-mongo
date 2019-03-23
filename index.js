@@ -31,10 +31,15 @@ function mongo (options) {
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl, {
-      useNewUrlParser: true,
-      reconnectTries: 1
-    }),
+    create: () => MongoClient.connect(mongoUrl, { useNewUrlParser: true, reconnectTries: 1 })
+      .catch(err => {
+        debug('Failed to connect to database');
+        return new Error(err);
+      })
+      .then(client => {
+        debug('Successfully connected to database');
+        return client;
+      }),
     destroy: client => client.close()
   }, options)
 
