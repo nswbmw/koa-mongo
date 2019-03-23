@@ -17,6 +17,7 @@ app.use(mongo({
   user: 'admin',
   pass: '123456',
   db: 'test',
+  authSource: 'admin',
   max: 100,
   min: 1,
   ...
@@ -27,7 +28,7 @@ or
 
 ```js
 app.use(mongo({
-  uri: 'mongodb://admin:123456@localhost:27017/test', //or url
+  uri: 'mongodb://admin:123456@localhost:27017/test?authSource=admin', //or url
   max: 100,
   min: 1
   ...
@@ -41,6 +42,7 @@ defaultOptions:
   host: 'localhost',
   port: 27017,
   db: 'test',
+  authSource: 'admin',
   max: 100,
   min: 1,
   acquireTimeoutMillis: 100
