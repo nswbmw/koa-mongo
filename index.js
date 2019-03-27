@@ -10,7 +10,7 @@ const defaultOptions = {
   host: 'localhost',
   port: 27017,
   db: 'test',
-  authSource = 'admin',
+  authSource: 'admin',
   max: 100,
   min: 1,
   acquireTimeoutMillis: 100
@@ -22,7 +22,7 @@ function mongo (options) {
   let dbName = options.db
   if (!mongoUrl) {
     if (options.user && options.pass) {
-      mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}?authSource=${authSource}`
+      mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}?authSource=${options.authSource}`
     } else {
       mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`
     }
