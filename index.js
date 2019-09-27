@@ -27,8 +27,7 @@ function mongo (options) {
       mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`
     }
   } else {
-    const o = muri(mongoUrl)
-    dbName = o.db
+    dbName = muri(mongoUrl.replace('+srv', '')).db
   }
 
   const mongoPool = genericPool.createPool({
