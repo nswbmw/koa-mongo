@@ -31,7 +31,11 @@ function mongo (connOptions, confOptions = {}) {
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl, Object.assign({}, { useNewUrlParser: true, reconnectTries: 1 }, confOptions))
+    create: () => MongoClient.connect(mongoUrl, Object.assign({
+      useNewUrlParser: true,
+      reconnectTries: 1,
+      useUnifiedTopology: true
+    }, confOptions))
       .then(client => {
         debug('Successfully connected to: ' + mongoUrl)
         return client
