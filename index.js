@@ -16,22 +16,22 @@ const defaultOptions = {
   acquireTimeoutMillis: 100
 }
 
-function mongo (options) {
-  options = Object.assign({}, defaultOptions, options)
-  let mongoUrl = options.uri || options.url
-  let dbName = options.db
+function mongo (connOptions, confOptions = {}) {
+  connOptions = Object.assign({}, defaultOptions, connOptions)
+  let mongoUrl = connOptions.uri || connOptions.url
+  let dbName = connOptions.db
   if (!mongoUrl) {
-    if (options.user && options.pass) {
-      mongoUrl = `mongodb://${options.user}:${options.pass}@${options.host}:${options.port}/${options.db}?authSource=${options.authSource}`
+    if (connOptions.user && connOptions.pass) {
+      mongoUrl = `mongodb://${connOptions.user}:${connOptions.pass}@${connOptions.host}:${connOptions.port}/${connOptions.db}?authSource=${connOptions.authSource}`
     } else {
-      mongoUrl = `mongodb://${options.host}:${options.port}/${options.db}`
+      mongoUrl = `mongodb://${connOptions.host}:${connOptions.port}/${connOptions.db}`
     }
   } else {
     dbName = muri(mongoUrl.replace('+srv', '')).db
   }
 
   const mongoPool = genericPool.createPool({
-    create: () => MongoClient.connect(mongoUrl, { useNewUrlParser: true, reconnectTries: 1 })
+    create: () => MongoClient.connect(mongoUrl, Object.assign({}, { useNewUrlParser: true, reconnectTries: 1 }, confOptions))
       .then(client => {
         debug('Successfully connected to: ' + mongoUrl)
         return client
@@ -41,11 +41,11 @@ function mongo (options) {
         throw err
       }),
     destroy: client => client.close()
-  }, options)
+  }, connOptions)
 
   async function acquire () {
     const resource = await mongoPool.acquire()
-    debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size)
+    debug('Acquire one connection (min: %s, max: %s, poolSize: %s)', connOptions.min, connOptions.max, mongoPool.size)
 
     return resource
   }
@@ -56,7 +56,7 @@ function mongo (options) {
     } else {
       await mongoPool.release(resource)
     }
-    debug('Release one connection (min: %s, max: %s, poolSize: %s)', options.min, options.max, mongoPool.size)
+    debug('Release one connection (min: %s, max: %s, poolSize: %s)', connOptions.min, connOptions.max, mongoPool.size)
   }
 
   return async function koaMongo (ctx, next) {

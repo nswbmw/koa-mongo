@@ -35,6 +35,21 @@ app.use(mongo({
 }));
 ```
 
+or
+
+```js
+app.use(mongo({
+  uri: 'mongodb://admin:123456@localhost:27017/test?authSource=admin', //or url
+  max: 100,
+  min: 1
+  ...
+}, {
+  useUnifiedTopology: true
+  ...
+}
+));
+```
+
 defaultOptions:
 
 ```js
