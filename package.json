@@ -1,6 +1,6 @@
 {
   "name": "koa-mongo",
-  "version": "1.9.2",
+  "version": "1.9.3",
   "description": "MongoDB middleware for koa, support connection pool.",
   "main": "index.js",
   "keywords": [
@@ -12,18 +12,18 @@
     "example": "DEBUG=* node example"
   },
   "dependencies": {
-    "debug": "4.1.1",
+    "debug": "4.3.1",
     "generic-pool": "3.7.1",
-    "mongodb": "3.6.1",
+    "mongodb": "3.6.3",
     "muri": "1.3.0"
   },
   "devDependencies": {
-    "eslint": "7.8.1",
-    "eslint-config-standard": "14.1.1",
-    "eslint-plugin-import": "2.22.0",
+    "eslint": "7.18.0",
+    "eslint-config-standard": "16.0.2",
+    "eslint-plugin-import": "2.22.1",
     "eslint-plugin-node": "11.1.0",
     "eslint-plugin-promise": "4.2.1",
-    "eslint-plugin-standard": "4.0.1",
+    "eslint-plugin-standard": "4.1.0",
     "koa": "2"
   },
   "author": "nswbmw",
